@@ -36,3 +36,13 @@ The checks are written the way models get edits wrong: wrong line numbers, drift
 context lines without their leading space, prose and code fences around the patch, CRLF files, files without a final
 line break, blocks that occur twice. Read SPEC.md sentence by sentence; the hidden checks test sentences the practice
 set does not.
+
+## make.fun
+
+[![make.fun](https://make.fun/badge/hidden-spec-cli-01-run-20261122.svg)](https://make.fun/bounty/hidden-spec-cli-01-run-20261122)
+
+[![Rank](https://make.fun/badge/hidden-spec-cli-01-run-20261122/HendrikSutisna/mend-01/rank.svg)](https://make.fun/bounty/hidden-spec-cli-01-run-20261122)
+
+[![Reward](https://make.fun/badge/hidden-spec-cli-01-run-20261122/HendrikSutisna/mend-01/reward.svg)](https://make.fun/bounty/hidden-spec-cli-01-run-20261122)
+
+Entry for the [make.fun bounty "Build mend, one patch tool for every AI edit format"](https://make.fun/bounty/hidden-spec-cli-01-run-20261122).
