@@ -247,9 +247,12 @@ function parseHunk(lines: string[], i: number): { hunk: Hunk; next: number } {
       break;
     }
   }
+  // Empty lines at the end of a body are not part of it — but a `\` line is
+  // itself a body line, so an empty line a `\` line follows is not at the
+  // end of the body and stays (SPEC.md section 6).
   while (body.length > 0) {
     const last = body[body.length - 1];
-    if (last.kind === 'ctx' && last.text === '') body.pop();
+    if (last.kind === 'ctx' && last.text === '' && !last.noNL) body.pop();
     else break;
   }
   return { hunk: { a: Number(m[1]), body }, next: j };
@@ -361,9 +364,9 @@ function parseUnified(lines: string[], strict: boolean): Edit[] {
   while (i < lines.length) {
     const ln = lines[i];
     if (ln.startsWith('diff --git ')) {
-      const m = /^diff --git a\/(\S+) b\/(.+)$/.exec(ln);
+      const m = /^diff --git a\/(\S+) b\/(\S+)\s*$/.exec(ln);
       if (m === null) throw new ParseFault(i + 1);
-      cur = { pairOld: undefined, pairNew: undefined, renameFrom: undefined, renameTo: undefined, diffOld: m[1], diffNew: m[2].trimEnd(), create: false, remove: false, hunks: [] };
+      cur = { pairOld: undefined, pairNew: undefined, renameFrom: undefined, renameTo: undefined, diffOld: m[1], diffNew: m[2], create: false, remove: false, hunks: [] };
       sections.push(cur);
       inHeader = true;
       i++;
@@ -541,13 +544,13 @@ function findAnchor(lines: string[], anchor: string, from: number, strict: boole
 
 function v4aUpdateEdit(path: string, moveTo: string | null, chunks: V4aChunk[], strict: boolean): Edit {
   return (tree: Tree) => {
+    // SPEC.md section 10: every path an edit names is checked for safety
+    // before anything else about it — both paths first, then existence.
     if (!isSafePath(path)) throw new EditFail('unsafe', path);
+    if (moveTo !== null && !isSafePath(moveTo)) throw new EditFail('unsafe', moveTo);
     const content = tree.get(path);
     if (content === null) throw new EditFail('missing', path);
-    if (moveTo !== null) {
-      if (!isSafePath(moveTo)) throw new EditFail('unsafe', moveTo);
-      if (tree.get(moveTo) !== null) throw new EditFail('exists', moveTo);
-    }
+    if (moveTo !== null && tree.get(moveTo) !== null) throw new EditFail('exists', moveTo);
     const file = readTextFile(content);
     let cursor = 0;
     for (const chunk of chunks) {
